@@ -1,0 +1,16 @@
+{
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2, // 탭 크기를 2로 설정
+  "editor.insertSpaces": true, // 탭 대신 공백 사용
+  "editor.detectIndentation": false, // 파일 내용에 따라 자동으로 들여쓰기 감지 비활성화
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "prettier.requireConfig": true
+}
