@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import StyledTodoList from './TodoList.styles';
 
 type StatusType = '미시작' | '진행중' | '완료';
@@ -14,17 +15,23 @@ interface Todo {
   date: Date;
 }
 
+const INITIAL_TODOS: Todo[] = [];
+const SORT_TEXT = {
+  Ascending: '오름차순',
+  Descending: '내림차순',
+};
+
 export default function TodoList() {
-  const [todoList, setTodoList] = useState<Todo[]>([]);
+  const [todoList, setTodoList] = useState<Todo[]>(INITIAL_TODOS);
   const [input, setInput] = useState<string>('');
   const [sort, setSort] = useState<SortType>('Ascending');
-  const [filtered, setFiltered] = useState<string>('');
+  const [filter, setFilter] = useState<string>('');
 
   const addTodo = () => {
     const today = new Date();
     setTodoList([
       ...todoList,
-      { id: todoList.length, text: input, status: '미시작', date: today },
+      { id: uuidv4(), text: input, status: '미시작', date: today },
     ]);
     setInput('');
   };
@@ -33,55 +40,66 @@ export default function TodoList() {
     setTodoList((prevTodo) => prevTodo.filter((todo) => todo.id !== id));
   };
 
-  // 작업 생성
-  const handleClickAddBtn = () => {
-    addTodo();
-  };
-
-  // 작업 삭제
-  const handleClickDeleteBtn = (id: number) => {
-    deleteTodo(id);
-  };
-
-  const handleClickStatueCompleted = (id: number) => {
+  const markTodoAsCompleted = (id: number) => {
     setTodoList((prevTodolist) =>
-      prevTodolist.map((list) => {
-        return list.id === id ? { ...list, status: '완료' } : list;
-      }),
+      prevTodolist.map((todo) =>
+        todo.id === id ? { ...todo, status: '완료' } : todo,
+      ),
     );
   };
 
-  const handleChangeStatusSelect = (id: number, status: StatusType) => {
-    // console.log({ id, status });
+  const changeTodoStatus = (id: number, status: StatusType) => {
     setTodoList((prevTodolist) =>
-      prevTodolist.map((list) => {
-        return list.id === id ? { ...list, status } : list;
-      }),
+      prevTodolist.map((todo) => (todo.id === id ? { ...todo, status } : todo)),
     );
   };
 
-  const handleClickSort = () => {
+  const toggleSortOrder = () => {
     setSort((prevSort) =>
       prevSort === 'Ascending' ? 'Descending' : 'Ascending',
     );
   };
 
-  const handleChangeFilterValue = (value: string) => {
-    setFiltered(value);
+  const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  };
+
+  const handleChangeFilter = (e: ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
+
+  const handleClickAdd = () => {
+    addTodo();
+  };
+
+  const handleClickDelete = (id: number) => {
+    deleteTodo(id);
+  };
+
+  const handleClickComplete = (id: number) => {
+    markTodoAsCompleted(id);
+  };
+
+  const handleClickSort = () => {
+    toggleSortOrder();
+  };
+
+  const handleChangeStatus = (id: number, status: StatusType) => {
+    changeTodoStatus(id, status);
   };
 
   return (
     <StyledTodoList>
       <h1>Todo List</h1>
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', gap: '10px' }}>
           <p>작업 추가 영역 : </p>
           <input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleChangeInput}
             placeholder="입력 필드"
           />
-          <button type="button" onClick={handleClickAddBtn}>
+          <button type="button" onClick={handleClickAdd}>
             작업 추가
           </button>
         </div>
@@ -89,8 +107,8 @@ export default function TodoList() {
         <div style={{ display: 'flex', gap: '10px' }}>
           <p>검색 영역: </p>
           <input
-            value={filtered}
-            onChange={(e) => handleChangeFilterValue(e.target.value)}
+            value={filter}
+            onChange={handleChangeFilter}
             placeholder="검색 항목을 넣어주세요"
           />
         </div>
@@ -98,16 +116,14 @@ export default function TodoList() {
         <div style={{ display: 'flex', gap: '10px' }}>
           <p>정렬 상태 :</p>
           <button type="button" onClick={handleClickSort}>
-            {sort}
+            {SORT_TEXT[sort]}
           </button>
         </div>
 
         <div>----------------------</div>
         {todoList &&
           todoList
-            .filter((list) => {
-              return !!list.text.includes(filtered);
-            })
+            .filter((todo) => todo.text.includes(filter))
             .sort((a, b) => {
               if (sort === 'Ascending') {
                 return a.text.localeCompare(b.text);
@@ -125,7 +141,7 @@ export default function TodoList() {
                   <p>{text}</p>
                   <select
                     onChange={(e) =>
-                      handleChangeStatusSelect(id, e.target.value as StatusType)
+                      handleChangeStatus(id, e.target.value as StatusType)
                     }
                     value={status}
                   >
@@ -136,16 +152,13 @@ export default function TodoList() {
                   <button
                     type="button"
                     onClick={() => {
-                      handleClickStatueCompleted(id);
+                      handleClickComplete(id);
                     }}
                   >
                     완료
                   </button>
                   <p>{date.toUTCString()}</p>
-                  <button
-                    type="button"
-                    onClick={() => handleClickDeleteBtn(id)}
-                  >
+                  <button type="button" onClick={() => handleClickDelete(id)}>
                     제거
                   </button>
                 </div>
