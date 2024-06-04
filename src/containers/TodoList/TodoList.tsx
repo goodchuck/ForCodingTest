@@ -27,6 +27,9 @@ export default function TodoList() {
   const [sort, setSort] = useState<SortType>('Ascending');
   const [filter, setFilter] = useState<string>('');
 
+  /**
+   * 일정을 추가하는 함수
+   */
   const addTodo = () => {
     const today = new Date();
     setTodoList([
@@ -36,10 +39,18 @@ export default function TodoList() {
     setInput('');
   };
 
+  /**
+   * 일정을 제거하는 함수
+   * @param id
+   */
   const deleteTodo = (id: number) => {
     setTodoList((prevTodo) => prevTodo.filter((todo) => todo.id !== id));
   };
 
+  /**
+   * 일정을 완료로 만드는 함수
+   * @param id
+   */
   const markTodoAsCompleted = (id: number) => {
     setTodoList((prevTodolist) =>
       prevTodolist.map((todo) =>
@@ -48,12 +59,20 @@ export default function TodoList() {
     );
   };
 
+  /**
+   * 일정을 status에 맞게 변경하는 함수
+   * @param id
+   * @param status
+   */
   const changeTodoStatus = (id: number, status: StatusType) => {
     setTodoList((prevTodolist) =>
       prevTodolist.map((todo) => (todo.id === id ? { ...todo, status } : todo)),
     );
   };
 
+  /**
+   * 일정을 정렬하는 함수
+   */
   const toggleSortOrder = () => {
     setSort((prevSort) =>
       prevSort === 'Ascending' ? 'Descending' : 'Ascending',
@@ -90,80 +109,82 @@ export default function TodoList() {
 
   return (
     <StyledTodoList>
-      <h1>Todo List</h1>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <p>작업 추가 영역 : </p>
-          <input
-            value={input}
-            onChange={handleChangeInput}
-            placeholder="입력 필드"
-          />
-          <button type="button" onClick={handleClickAdd}>
-            작업 추가
-          </button>
-        </div>
+      <div className="TodoList__wrapper">
+        <h1>Todo List</h1>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <p>작업 추가 영역 : </p>
+            <input
+              value={input}
+              onChange={handleChangeInput}
+              placeholder="입력 필드"
+            />
+            <button type="button" onClick={handleClickAdd}>
+              작업 추가
+            </button>
+          </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <p>검색 영역: </p>
-          <input
-            value={filter}
-            onChange={handleChangeFilter}
-            placeholder="검색 항목을 넣어주세요"
-          />
-        </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <p>검색 영역: </p>
+            <input
+              value={filter}
+              onChange={handleChangeFilter}
+              placeholder="검색 항목을 넣어주세요"
+            />
+          </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <p>정렬 상태 :</p>
-          <button type="button" onClick={handleClickSort}>
-            {SORT_TEXT[sort]}
-          </button>
-        </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <p>정렬 상태 :</p>
+            <button type="button" onClick={handleClickSort}>
+              {SORT_TEXT[sort]}
+            </button>
+          </div>
 
-        <div>----------------------</div>
-        {todoList &&
-          todoList
-            .filter((todo) => todo.text.includes(filter))
-            .sort((a, b) => {
-              if (sort === 'Ascending') {
-                return a.text.localeCompare(b.text);
-              }
-              return b.text.localeCompare(a.text);
-            })
-            .map((list, index) => {
-              const { id, text, status, date } = list;
-              return (
-                <div
-                  key={`${index + Math.random()}`}
-                  style={{ display: 'flex', gap: '20px' }}
-                  className={list.status === '완료' ? 'cancel' : ''}
-                >
-                  <p>{text}</p>
-                  <select
-                    onChange={(e) =>
-                      handleChangeStatus(id, e.target.value as StatusType)
-                    }
-                    value={status}
+          <div>----------------------</div>
+          {todoList &&
+            todoList
+              .filter((todo) => todo.text.includes(filter))
+              .sort((a, b) => {
+                if (sort === 'Ascending') {
+                  return a.text.localeCompare(b.text);
+                }
+                return b.text.localeCompare(a.text);
+              })
+              .map((list, index) => {
+                const { id, text, status, date } = list;
+                return (
+                  <div
+                    key={`${index + Math.random()}`}
+                    style={{ display: 'flex', gap: '20px' }}
+                    className={list.status === '완료' ? 'TodoList__cancel' : ''}
                   >
-                    <option value="미완성">미시작</option>
-                    <option value="진행중">진행중</option>
-                    <option value="완료">완료</option>
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleClickComplete(id);
-                    }}
-                  >
-                    완료
-                  </button>
-                  <p>{date.toUTCString()}</p>
-                  <button type="button" onClick={() => handleClickDelete(id)}>
-                    제거
-                  </button>
-                </div>
-              );
-            })}
+                    <p>{text}</p>
+                    <select
+                      onChange={(e) =>
+                        handleChangeStatus(id, e.target.value as StatusType)
+                      }
+                      value={status}
+                    >
+                      <option value="미완성">미시작</option>
+                      <option value="진행중">진행중</option>
+                      <option value="완료">완료</option>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleClickComplete(id);
+                      }}
+                    >
+                      완료
+                    </button>
+                    <p>{date.toUTCString()}</p>
+                    <button type="button" onClick={() => handleClickDelete(id)}>
+                      제거
+                    </button>
+                  </div>
+                );
+              })}
+        </div>
       </div>
     </StyledTodoList>
   );
